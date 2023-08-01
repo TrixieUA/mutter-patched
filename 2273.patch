@@ -1,0 +1,44 @@
+From a7c188b7e69466560d246547cf0551207cb06806 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fran=C3=A7ois=20Guerraz?= <francois@orographic.uk>
+Date: Mon, 7 Feb 2022 16:09:14 +0000
+Subject: [PATCH] Set rl.rlim_max to something sensible
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Let's assume that even at a super low 24fps refrash rate,
+even with triple buffering, mutter should not block for
+more than 10^6÷24×3=125000µs
+---
+ src/backends/native/meta-backend-native.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/backends/native/meta-backend-native.c b/src/backends/native/meta-backend-native.c
+index e3d2c5ab032..5c1db10061c 100644
+--- a/src/backends/native/meta-backend-native.c
++++ b/src/backends/native/meta-backend-native.c
+@@ -39,6 +39,7 @@
+ #include "backends/native/meta-input-thread.h"
+ 
+ #include <stdlib.h>
++#include <sys/resource.h>
+ 
+ #include "backends/meta-cursor-tracker-private.h"
+ #include "backends/meta-idle-manager.h"
+@@ -236,8 +237,13 @@ meta_backend_native_post_init (MetaBackend *backend)
+       if (rtkit_proxy)
+         {
+           uint32_t priority;
++          struct rlimit rl;
++
++          rl.rlim_cur = 125000;
++          rl.rlim_max = 125000;
+ 
+           priority = sched_get_priority_min (SCHED_RR);
++          setrlimit(RLIMIT_RTTIME, &rl);
+           meta_dbus_realtime_kit1_call_make_thread_realtime_sync (rtkit_proxy,
+                                                                   gettid (),
+                                                                   priority,
+-- 
+GitLab
+
