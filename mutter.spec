@@ -2,7 +2,7 @@
 ## (rpmautospec version 0.3.5)
 ## RPMAUTOSPEC: autorelease, autochangelog
 %define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
-    release_number = 7;
+    release_number = 8;
     base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
     print(release_number + base_release_number - 1);
 }%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
@@ -51,6 +51,8 @@ Patch4:        3056.patch
 #  Backports for 44.4 
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3132
 Patch5:        3132.patch
+
+Patch6:        autorotate.patch
 
 BuildRequires: pkgconfig(gobject-introspection-1.0) >= 1.41.0
 BuildRequires: pkgconfig(sm)
