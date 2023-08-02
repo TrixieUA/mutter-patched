@@ -52,7 +52,6 @@ Patch4:        3056.patch
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3132
 Patch5:        3132.patch
 
-Patch6:        autorotate.patch
 
 BuildRequires: pkgconfig(gobject-introspection-1.0) >= 1.41.0
 BuildRequires: pkgconfig(sm)
