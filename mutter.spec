@@ -7,18 +7,20 @@
 %global pipewire_version 0.3.33
 %global lcms2_version 2.6
 %global colord_version 1.4.5
-%global mutter_api_version 12
+%global libei_version 1.0.0
+%global mutter_api_version 13
+%global toolchain clang
 
 %global tarball_version %%(echo %{version} | tr '~' '.')
 
 Name:          mutter
-Version:       44.3
+Version:       45~beta
 Release:       %autorelease
 Summary:       Window and compositing manager based on Clutter
 
 License:       GPLv2+
 URL:           http://www.gnome.org
-Source0:       %{name}-%{tarball_version}.tar.xz
+Source0:       http://download.gnome.org/sources/%{name}/45/%{name}-%{tarball_version}.tar.xz
 
 # Work-around for OpenJDK's compliance test
 Patch0:        0001-window-actor-Special-case-shaped-Java-windows.patch
@@ -28,6 +30,15 @@ Patch1:        mutter-42.alpha-disable-tegra.patch
 
 # https://pagure.io/fedora-workstation/issue/79
 Patch2:        0001-place-Always-center-initial-setup-fedora-welcome.patch
+
+# fix super key no longer triggering overview
+# https://gitlab.gnome.org/GNOME/mutter/-/issues/2951
+# https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3162
+Patch3:        3162.patch
+
+# Triple buffer
+# https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/1441
+Patch4:        1441.patch
 
 BuildRequires: pkgconfig(gobject-introspection-1.0) >= 1.41.0
 BuildRequires: pkgconfig(sm)
@@ -60,11 +71,9 @@ BuildRequires: pkgconfig(libsystemd)
 BuildRequires: xorg-x11-server-Xorg
 BuildRequires: xorg-x11-server-Xvfb
 BuildRequires: pkgconfig(xkeyboard-config)
-# see src/tests/x11-test.sh
-BuildRequires: zenity
 BuildRequires: desktop-file-utils
 # Bootstrap requirements
-BuildRequires: gtk-doc gettext-devel git-core
+BuildRequires: gettext-devel git-core
 BuildRequires: pkgconfig(libcanberra)
 BuildRequires: pkgconfig(gsettings-desktop-schemas) >= %{gsettings_desktop_schemas_version}
 BuildRequires: pkgconfig(gnome-settings-daemon)
@@ -79,6 +88,14 @@ BuildRequires: pkgconfig(wayland-protocols)
 BuildRequires: pkgconfig(wayland-server)
 BuildRequires: pkgconfig(lcms2) >= %{lcms2_version}
 BuildRequires: pkgconfig(colord) >= %{colord_version}
+BuildRequires: pkgconfig(libei-1.0) >= %{libei_version}
+BuildRequires: pkgconfig(libeis-1.0) >= %{libei_version}
+BuildRequires:  llvm
+BuildRequires:  llvm-devel
+BuildRequires:  clang
+BuildRequires:  clang-libs
+BuildRequires:  lld
+BuildRequires:  clang-devel
 
 BuildRequires: pkgconfig(json-glib-1.0) >= %{json_glib_version}
 BuildRequires: pkgconfig(libinput) >= %{libinput_version}
@@ -87,7 +104,6 @@ BuildRequires: pkgconfig(xwayland)
 Requires: control-center-filesystem
 Requires: gsettings-desktop-schemas%{?_isa} >= %{gsettings_desktop_schemas_version}
 Requires: gnome-settings-daemon
-Requires: gtk3%{?_isa} >= %{gtk3_version}
 Requires: gtk4%{?_isa} >= %{gtk4_version}
 Requires: json-glib%{?_isa} >= %{json_glib_version}
 Requires: libinput%{?_isa} >= %{libinput_version}
@@ -128,7 +144,9 @@ utilities for testing Metacity/Mutter themes.
 
 %package  tests
 Summary:  Tests for the %{name} package
+Requires: %{name}-devel%{?_isa} = %{version}-%{release}
 Requires: %{name}%{?_isa} = %{version}-%{release}
+Requires: gtk3%{?_isa} >= %{gtk3_version}
 
 %description tests
 The %{name}-tests package contains tests that can be used to verify
