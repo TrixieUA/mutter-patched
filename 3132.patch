@@ -1,7 +1,7 @@
-From 6b39cd211928b704dc18ab4c99b161647e82b92e Mon Sep 17 00:00:00 2001
+From b50d6404d5a1e0ea27531e85b1845a4685362a37 Mon Sep 17 00:00:00 2001
 From: Gergo Koteles <soyer@irl.hu>
 Date: Wed, 19 Jul 2023 01:19:16 +0200
-Subject: [PATCH 1/4] wayland: Find touch grab sequence in subsurfaces also
+Subject: [PATCH 1/7] wayland: Find touch grab sequence in subsurfaces also
 
 With libdecor, window moving/resizing only works with
 the pointer, not with touch.
@@ -62,10 +62,10 @@ index 6d45b4b7b30..37e1a611c66 100644
 GitLab
 
 
-From b79431130c43ec34f72add6aaed57c08dc0807df Mon Sep 17 00:00:00 2001
+From 215d90286712390ee4f87c813ad523abbc6e5288 Mon Sep 17 00:00:00 2001
 From: Daniel van Vugt <daniel.van.vugt@canonical.com>
 Date: Wed, 12 Jul 2023 18:42:47 +0800
-Subject: [PATCH 2/4] stage-impl: Blit damage regions of all ages when using a
+Subject: [PATCH 2/7] stage-impl: Blit damage regions of all ages when using a
  shadow FB
 
 Original idea by Gert van de Kraats, modified to avoid having an
@@ -103,10 +103,10 @@ index db94c7e40a4..daa5c90d25d 100644
 GitLab
 
 
-From 4f5bc4d1e4a735b90b5a6615f96df37c8aa9d026 Mon Sep 17 00:00:00 2001
+From 4f652140596888640e7fc6f725fc7d3123ad42b0 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Michel=20D=C3=A4nzer?= <mdaenzer@redhat.com>
 Date: Tue, 27 Jun 2023 12:09:13 +0200
-Subject: [PATCH 3/4] frames: Fix XGetWMNormalHints return value check
+Subject: [PATCH 3/7] frames: Fix XGetWMNormalHints return value check
 
 It returns non-0 if there are any hints in the WM_NORMAL_HINTS
 property, 0 if there are none.
@@ -145,10 +145,10 @@ index 345751ad148..edb7378e047 100644
 GitLab
 
 
-From 41c02769bfbf1587265715aca0f9b53f23ea4a8f Mon Sep 17 00:00:00 2001
+From 6a2749c8e1fb29ebdbaf5a0570ad6acbdc056eb3 Mon Sep 17 00:00:00 2001
 From: Sebastian Keller <skeller@gnome.org>
 Date: Wed, 31 May 2023 14:14:04 +0200
-Subject: [PATCH 4/4] constraints: Delay initial maximization until after
+Subject: [PATCH 4/7] constraints: Delay initial maximization until after
  reparenting is done
 
 For SSD windows the decoration window from the frames client might have
@@ -181,3 +181,184 @@ index 9a5398d1ac5..fe4ef407a14 100644
 -- 
 GitLab
 
+
+From 51e9fa8387892185f69081453a0039d017035780 Mon Sep 17 00:00:00 2001
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Fri, 7 Jul 2023 19:29:05 +0800
+Subject: [PATCH 5/7] clutter/paint-volume: Don't over-enlarge 2D actorless
+ paint volumes
+
+A 2D actorless paint volume can't ever need `enlarge_for_effects` because
+it has no depth. Clamping to the pixel boundary is sufficient in this case
+and avoids extending volumes on the edge of the view into the next view.
+Which then avoids unnecessary secondary monitor updates.
+
+Paint volumes correctly become actorless where `clutter_actor_finish_layout`
+calls `_clutter_paint_volume_transform_relative`.
+
+Relates to: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6819
+
+Part-of: <https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3112>
+
+(cherry picked from commit 2305efa990a43ec5a46c1fbb14a2d6b4613d8089)
+---
+ clutter/clutter/clutter-paint-volume.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/clutter/clutter/clutter-paint-volume.c b/clutter/clutter/clutter-paint-volume.c
+index e2f273ef335..8986983d3d2 100644
+--- a/clutter/clutter/clutter-paint-volume.c
++++ b/clutter/clutter/clutter-paint-volume.c
+@@ -1061,8 +1061,8 @@ _clutter_paint_volume_get_stage_paint_box (const ClutterPaintVolume *pv,
+ 
+   _clutter_paint_volume_get_bounding_box (&projected_pv, box);
+ 
+-  if (pv->is_2d && pv->actor &&
+-      clutter_actor_get_z_position (pv->actor) == 0)
++  if (pv->is_2d &&
++      (!pv->actor || clutter_actor_get_z_position (pv->actor) == 0))
+     {
+       /* If the volume/actor are perfectly 2D, take the bounding box as
+        * good. We won't need to add any extra room for sub-pixel positioning
+-- 
+GitLab
+
+
+From a95baeb48d39fc7ec6867504052c89cf0b12799e Mon Sep 17 00:00:00 2001
+From: Sebastian Wick <sebastian.wick@redhat.com>
+Date: Fri, 10 Mar 2023 21:34:05 +0100
+Subject: [PATCH 6/7] Revert "workspace: Focus the default window only if no
+ window is focused"
+
+This reverts commit 058981dc12b294b84040147eab247ac72da3011c.
+
+Part-of: <https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/2909>
+
+(cherry picked from commit 3bbff537d9f95ba2f7fe328bcf3bd2c1d9de5900)
+---
+ src/core/workspace.c | 25 -------------------------
+ 1 file changed, 25 deletions(-)
+
+diff --git a/src/core/workspace.c b/src/core/workspace.c
+index a70791b4693..2a5c0c1ebe7 100644
+--- a/src/core/workspace.c
++++ b/src/core/workspace.c
+@@ -1339,40 +1339,15 @@ meta_workspace_get_name (MetaWorkspace *workspace)
+   return meta_prefs_get_workspace_name (meta_workspace_index (workspace));
+ }
+ 
+-static MetaWindow *
+-get_focused_workspace_window (MetaWorkspace *workspace)
+-{
+-  g_autoptr (GList) windows = NULL;
+-  GList *l;
+-
+-  windows = meta_workspace_list_windows (workspace);
+-
+-  for (l = windows; l != NULL; l = l->next)
+-    {
+-      MetaWindow *window = l->data;
+-
+-      if (meta_window_has_focus (window))
+-        return window;
+-    }
+-
+-  return NULL;
+-}
+-
+ void
+ meta_workspace_focus_default_window (MetaWorkspace *workspace,
+                                      MetaWindow    *not_this_one,
+                                      guint32        timestamp)
+ {
+-  MetaWindow *focus;
+-
+   if (timestamp == META_CURRENT_TIME)
+     meta_warning ("META_CURRENT_TIME used to choose focus window; "
+                   "focus window may not be correct.");
+ 
+-  focus = get_focused_workspace_window (workspace);
+-  if (focus != NULL && focus != not_this_one)
+-    return;
+-
+   if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_CLICK ||
+       !workspace->display->mouse_mode)
+     {
+-- 
+GitLab
+
+
+From 41e41e2e2b937e28d438a5b2133e853d6c6203eb Mon Sep 17 00:00:00 2001
+From: Sebastian Wick <sebastian.wick@redhat.com>
+Date: Fri, 10 Mar 2023 21:33:47 +0100
+Subject: [PATCH 7/7] core/window: Change MRU behavior for windows on secondary
+ output
+
+Current behavior pushes a window which receives focus to the start of
+the MRU list on every workspace it is on. By focusing a sticky window
+the default focus on all other workspaces changes as well. This is fine
+for sticky windows explicitly marked as sticky by the user but if a
+window is on a secondary output and workspaces are only on the primary
+output the behavior is unexpected. Instead we want the window to be the
+default focus only on the current workspace but also keep those windows
+in a relative MRU order to each other on all workspaces.
+
+Closes: https://gitlab.gnome.org/GNOME/mutter/-/issues/2681
+Fixes: 058981dc1 ("workspace: Focus the default window only if no window is focused")
+Part-of: <https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/2909>
+
+(cherry picked from commit 87bd574598539196ae102cfdb294957993519e74)
+---
+ src/core/window.c | 34 +++++++++++++++++++++++++++++-----
+ 1 file changed, 29 insertions(+), 5 deletions(-)
+
+diff --git a/src/core/window.c b/src/core/window.c
+index abe87e787a3..aa80a7cca92 100644
+--- a/src/core/window.c
++++ b/src/core/window.c
+@@ -4518,14 +4518,38 @@ meta_window_make_most_recent (MetaWindow *window)
+   for (l = workspace_manager->workspaces; l != NULL; l = l->next)
+     {
+       MetaWorkspace *workspace = l->data;
+-      GList *link;
++      GList *self, *link;
+ 
+-      link = g_list_find (workspace->mru_list, window);
+-      if (!link)
++      self = g_list_find (workspace->mru_list, window);
++      if (!self)
+         continue;
+ 
+-      workspace->mru_list = g_list_delete_link (workspace->mru_list, link);
+-      workspace->mru_list = g_list_prepend (workspace->mru_list, window);
++      /*
++       * Move to the front of the MRU list if the window is on the
++       * active workspace or was explicitly made sticky
++       */
++      if (workspace == workspace_manager->active_workspace ||
++          window->on_all_workspaces_requested)
++        {
++          workspace->mru_list = g_list_delete_link (workspace->mru_list, self);
++          workspace->mru_list = g_list_prepend (workspace->mru_list, window);
++          continue;
++        }
++
++      /* Otherwise move it before other sticky windows */
++      for (link = workspace->mru_list; link; link = link->next)
++        {
++          MetaWindow *mru_window = link->data;
++
++          if (mru_window->workspace == NULL)
++            break;
++        }
++
++      if (link == self)
++        continue;
++
++      workspace->mru_list = g_list_delete_link (workspace->mru_list, self);
++      workspace->mru_list = g_list_insert_before (workspace->mru_list, link, window);
+     }
+ }
+ 
+-- 
+GitLab
