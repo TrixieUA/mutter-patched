@@ -1,7 +1,7 @@
-From 18e8950edb5943160d9d705707c22c7c2170e06d Mon Sep 17 00:00:00 2001
+From 460d38b46a13626b48ff7b278e25b3078d74ae8f Mon Sep 17 00:00:00 2001
 From: Gergo Koteles <soyer@irl.hu>
 Date: Wed, 19 Jul 2023 01:19:16 +0200
-Subject: [PATCH 1/2] wayland: Find touch grab sequence in subsurfaces also
+Subject: [PATCH 1/3] wayland: Find touch grab sequence in subsurfaces also
 
 With libdecor, window moving/resizing only works with
 the pointer, not with touch.
@@ -61,10 +61,10 @@ index 5824e229d60..949252e5a06 100644
 GitLab
 
 
-From 2f7f618865aa2a53a51ad31b7784b20a33024f34 Mon Sep 17 00:00:00 2001
+From a2da5e86ca1892cd9e66228351dc6e884301543b Mon Sep 17 00:00:00 2001
 From: Daniel van Vugt <daniel.van.vugt@canonical.com>
 Date: Wed, 12 Jul 2023 18:42:47 +0800
-Subject: [PATCH 2/2] stage-impl: Blit damage regions of all ages when using a
+Subject: [PATCH 2/3] stage-impl: Blit damage regions of all ages when using a
  shadow FB
 
 Original idea by Gert van de Kraats, modified to avoid having an
@@ -101,3 +101,44 @@ index 25d240d8100..93e911b4e35 100644
 -- 
 GitLab
 
+
+From 170fdeff8d19b502c08c83d86fa3245df010c538 Mon Sep 17 00:00:00 2001
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Fri, 7 Jul 2023 19:29:05 +0800
+Subject: [PATCH 3/3] clutter/paint-volume: Don't over-enlarge 2D actorless
+ paint volumes
+
+A 2D actorless paint volume can't ever need `enlarge_for_effects` because
+it has no depth. Clamping to the pixel boundary is sufficient in this case
+and avoids extending volumes on the edge of the view into the next view.
+Which then avoids unnecessary secondary monitor updates.
+
+Paint volumes correctly become actorless where `clutter_actor_finish_layout`
+calls `_clutter_paint_volume_transform_relative`.
+
+Relates to: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6819
+
+Part-of: <https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3112>
+
+(cherry picked from commit 2305efa990a43ec5a46c1fbb14a2d6b4613d8089)
+---
+ clutter/clutter/clutter-paint-volume.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/clutter/clutter/clutter-paint-volume.c b/clutter/clutter/clutter-paint-volume.c
+index dbec4d130f4..42854ba8943 100644
+--- a/clutter/clutter/clutter-paint-volume.c
++++ b/clutter/clutter/clutter-paint-volume.c
+@@ -1061,8 +1061,8 @@ _clutter_paint_volume_get_stage_paint_box (ClutterPaintVolume *pv,
+ 
+   _clutter_paint_volume_get_bounding_box (&projected_pv, box);
+ 
+-  if (pv->is_2d && pv->actor &&
+-      clutter_actor_get_z_position (pv->actor) == 0)
++  if (pv->is_2d &&
++      (!pv->actor || clutter_actor_get_z_position (pv->actor) == 0))
+     {
+       /* If the volume/actor are perfectly 2D, take the bounding box as
+        * good. We won't need to add any extra room for sub-pixel positioning
+-- 
+GitLab
