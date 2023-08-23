@@ -2,7 +2,7 @@
 ## (rpmautospec version 0.3.5)
 ## RPMAUTOSPEC: autorelease, autochangelog
 %define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
-    release_number = 9;
+    release_number = 1;
     base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
     print(release_number + base_release_number - 1);
 }%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
@@ -23,13 +23,13 @@
 %global tarball_version %%(echo %{version} | tr '~' '.')
 
 Name:          mutter
-Version:       44.3
-Release:       %autorelease.triplebuffer
+Version:       44.4
+Release:       %autorelease
 Summary:       Window and compositing manager based on Clutter
 
 License:       GPLv2+
 URL:           http://www.gnome.org
-Source0:       %{name}-%{tarball_version}.tar.xz
+Source0:       http://download.gnome.org/sources/%{name}/44/%{name}-%{tarball_version}.tar.xz
 
 # Work-around for OpenJDK's compliance test
 Patch0:        0001-window-actor-Special-case-shaped-Java-windows.patch
@@ -48,11 +48,7 @@ Patch3:        1441.patch
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3056
 Patch4:        3056.patch
 
-#  Backports for 44.4 
-# https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3132
-Patch5:        3132.patch
-
-Patch6:        autorotate.patch
+Patch5:        autorotate.patch
 
 BuildRequires: pkgconfig(gobject-introspection-1.0) >= 1.41.0
 BuildRequires: pkgconfig(sm)
@@ -126,6 +122,8 @@ Requires: pipewire%{_isa} >= %{pipewire_version}
 Requires: startup-notification
 Requires: dbus
 
+# Need common
+Requires: %{name}-common = %{version}-%{release}
 
 Recommends: mesa-dri-drivers%{?_isa}
 
@@ -135,6 +133,8 @@ Provides: firstboot(windowmanager) = mutter
 # significantly since then.
 Provides: bundled(cogl) = 1.22.0
 Provides: bundled(clutter) = 1.26.0
+
+Conflicts: mutter < 44.3-2
 
 %description
 Mutter is a window and compositing manager that displays and manages
@@ -147,6 +147,14 @@ used as the display core of a larger system such as GNOME Shell. For
 this reason, Mutter is very extensible via plugins, which are used both
 to add fancy visual effects and to rework the window management
 behaviors to meet the needs of the environment.
+
+%package common
+Summary: Common files used by %{name} and forks of %{name}
+BuildArch: noarch
+Conflicts: mutter < 44.3-2
+
+%description common
+Common files used by Mutter and soft forks of Mutter
 
 %package devel
 Summary: Development package for %{name}
@@ -186,11 +194,13 @@ the functionality of the installed %{name} package.
 %{_libdir}/mutter-%{mutter_api_version}/
 %{_libexecdir}/mutter-restart-helper
 %{_libexecdir}/mutter-x11-frames
+%{_mandir}/man1/mutter.1*
+
+%files common
 %{_datadir}/GConf/gsettings/mutter-schemas.convert
 %{_datadir}/glib-2.0/schemas/org.gnome.mutter.gschema.xml
 %{_datadir}/glib-2.0/schemas/org.gnome.mutter.wayland.gschema.xml
 %{_datadir}/gnome-control-center/keybindings/50-mutter-*.xml
-%{_mandir}/man1/mutter.1*
 %{_udevrulesdir}/61-mutter.rules
 
 %files devel
@@ -204,6 +214,16 @@ the functionality of the installed %{name} package.
 %{_datadir}/mutter-%{mutter_api_version}/tests
 
 %changelog
+* Wed Aug 23 2023 Florian Müllner <fmuellner@gnome.org> - 44.4-1
+- Update to 44.4
+
+* Tue Aug 15 2023 Joshua Strobl <me@joshuastrobl.com> - 44.3-2
+- Split common files into mutter-common for consumption by Budgie Desktop's
+  soft fork of Mutter
+
+* Thu Jul 06 2023 Florian Müllner <fmuellner@gnome.org> - 44.3-1
+- Update to 44.3
+
 * Thu Jun 08 2023 Florian Müllner <fmuellner@gnome.org> - 44.2-2
 - Drop upstreamed patch
 
@@ -1477,5 +1497,4 @@ the functionality of the installed %{name} package.
 
 * Thu Jun 18 2009 Peter Robinson <pbrobinson@gmail.com> 2.27.0-0.1
 - Initial packaging
-
 
