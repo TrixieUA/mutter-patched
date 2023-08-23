@@ -44,11 +44,12 @@ Patch2:        0001-place-Always-center-initial-setup-fedora-welcome.patch
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/1441
 Patch3:        1441.patch
 
-# Backports of fractional scale improvements for 44.4 
-# https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3056
-Patch4:        3056.patch
+# GPU optimizations for partial surface update 
+# https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/2965
+Patch6:	       2965.patch
 
-Patch5:        autorotate.patch
+Patch4:        autorotate.patch
+
 
 BuildRequires: pkgconfig(gobject-introspection-1.0) >= 1.41.0
 BuildRequires: pkgconfig(sm)
@@ -1497,4 +1498,3 @@ the functionality of the installed %{name} package.
 
 * Thu Jun 18 2009 Peter Robinson <pbrobinson@gmail.com> 2.27.0-0.1
 - Initial packaging
-
