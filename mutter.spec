@@ -2,7 +2,7 @@
 ## (rpmautospec version 0.3.5)
 ## RPMAUTOSPEC: autorelease, autochangelog
 %define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
-    release_number = 6;
+    release_number = 1;
     base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
     print(release_number + base_release_number - 1);
 }%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
@@ -22,8 +22,8 @@
 %global tarball_version %%(echo %{version} | tr '~' '.')
 
 Name:          mutter
-Version:       43.7
-Release:       %autorelease.triplebuffer
+Version:       43.8
+Release:       %autorelease
 Summary:       Window and compositing manager based on Clutter
 
 License:       GPLv2+
@@ -43,11 +43,6 @@ Patch2:        mutter-42.alpha-disable-tegra.patch
 # https://salsa.debian.org/gnome-team/mutter/-/blob/ubuntu/master/debian/patches/debian/
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/1441
 Patch3:        1441.patch
-
-#  Backports for 43.8 
-#  https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3133
-Patch4:        3133.patch
-
 
 BuildRequires: pkgconfig(gobject-introspection-1.0) >= 1.41.0
 BuildRequires: pkgconfig(sm)
@@ -98,17 +93,17 @@ BuildRequires: pkgconfig(wayland-protocols)
 BuildRequires: pkgconfig(wayland-server)
 BuildRequires: pkgconfig(lcms2) >= %{lcms2_version}
 BuildRequires: pkgconfig(colord) >= %{colord_version}
-
-BuildRequires: pkgconfig(json-glib-1.0) >= %{json_glib_version}
-BuildRequires: pkgconfig(libinput) >= %{libinput_version}
-BuildRequires: pkgconfig(xwayland)
-
 BuildRequires:  llvm
 BuildRequires:  llvm-devel
 BuildRequires:  clang
 BuildRequires:  clang-libs
 BuildRequires:  lld
 BuildRequires:  clang-devel
+
+
+BuildRequires: pkgconfig(json-glib-1.0) >= %{json_glib_version}
+BuildRequires: pkgconfig(libinput) >= %{libinput_version}
+BuildRequires: pkgconfig(xwayland)
 
 Requires: control-center-filesystem
 Requires: gsettings-desktop-schemas%{?_isa} >= %{gsettings_desktop_schemas_version}
@@ -121,6 +116,9 @@ Requires: startup-notification
 Requires: dbus
 Requires: zenity
 
+# Need common
+Requires: %{name}-common = %{version}-%{release}
+
 Recommends: mesa-dri-drivers%{?_isa}
 
 Provides: firstboot(windowmanager) = mutter
@@ -129,6 +127,8 @@ Provides: firstboot(windowmanager) = mutter
 # significantly since then.
 Provides: bundled(cogl) = 1.22.0
 Provides: bundled(clutter) = 1.26.0
+
+Conflicts: mutter < 43.7-2
 
 %description
 Mutter is a window and compositing manager that displays and manages
@@ -141,6 +141,14 @@ used as the display core of a larger system such as GNOME Shell. For
 this reason, Mutter is very extensible via plugins, which are used both
 to add fancy visual effects and to rework the window management
 behaviors to meet the needs of the environment.
+
+%package common
+Summary: Common files used by %{name} and forks of %{name}
+BuildArch: noarch
+Conflicts: mutter < 43.7-2
+
+%description common
+Common files used by Mutter and soft forks of Mutter
 
 %package devel
 Summary: Development package for %{name}
@@ -183,11 +191,13 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/%{name}.desktop
 %{_libdir}/lib*.so.*
 %{_libdir}/mutter-%{mutter_api_version}/
 %{_libexecdir}/mutter-restart-helper
+%{_mandir}/man1/mutter.1*
+
+%files common
 %{_datadir}/GConf/gsettings/mutter-schemas.convert
 %{_datadir}/glib-2.0/schemas/org.gnome.mutter.gschema.xml
 %{_datadir}/glib-2.0/schemas/org.gnome.mutter.wayland.gschema.xml
 %{_datadir}/gnome-control-center/keybindings/50-mutter-*.xml
-%{_mandir}/man1/mutter.1*
 %{_udevrulesdir}/61-mutter.rules
 
 %files devel
@@ -201,6 +211,16 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/%{name}.desktop
 %{_datadir}/mutter-%{mutter_api_version}/tests
 
 %changelog
+* Wed Aug 23 2023 Florian Müllner <fmuellner@gnome.org> - 43.8-1
+- Update to 43.8
+
+* Tue Aug 15 2023 Joshua Strobl <me@joshuastrobl.com> - 43.7-2
+- Split common files into mutter-common for consumption by soft forks of
+  Mutter such as Budgie Desktop's Magpie v0.x
+
+* Thu Jul 06 2023 Florian Müllner <fmuellner@gnome.org> - 43.7-1
+- Update to 43.7
+
 * Sat Jun 03 2023 Florian Müllner <fmuellner@gnome.org> - 43.6-1
 - Update to 43.6
 
@@ -1437,5 +1457,4 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/%{name}.desktop
 
 * Thu Jun 18 2009 Peter Robinson <pbrobinson@gmail.com> 2.27.0-0.1
 - Initial packaging
-
 
