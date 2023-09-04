@@ -2,7 +2,7 @@
 ## (rpmautospec version 0.3.5)
 ## RPMAUTOSPEC: autorelease, autochangelog
 %define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
-    release_number = 1;
+    release_number = 2;
     base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
     print(release_number + base_release_number - 1);
 }%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
@@ -44,11 +44,15 @@ Patch2:        0001-place-Always-center-initial-setup-fedora-welcome.patch
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/1441
 Patch3:        1441.patch
 
+Patch4:        autorotate.patch
+
 # GPU optimizations for partial surface update 
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/2965
-Patch6:	       2965.patch
+Patch5:	       2965.patch
 
-Patch4:        autorotate.patch
+# Backports for 44.5 
+# https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3222
+Patch6:        3222.patch
 
 
 BuildRequires: pkgconfig(gobject-introspection-1.0) >= 1.41.0
