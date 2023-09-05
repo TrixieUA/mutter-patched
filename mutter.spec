@@ -49,7 +49,7 @@ Patch4:        1441.patch
 
 # backends/native: Fix handling order of key event 
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3162
-Patch5:        3162.patch
+# Patch5:        3162.patch
 
 BuildRequires: pkgconfig(gobject-introspection-1.0) >= 1.41.0
 BuildRequires: pkgconfig(sm)
