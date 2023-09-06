@@ -24,7 +24,7 @@
 %global toolchain clang
 
 Name:          mutter
-Version:       45~beta.1
+Version:       45~rc
 Release:       %autorelease.triplebuffer
 Summary:       Window and compositing manager based on Clutter
 
@@ -47,9 +47,7 @@ Patch3:        0001-gschema-Enable-scale-monitor-framebuffer-experimenta.patch
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/1441
 Patch4:        1441.patch
 
-# backends/native: Fix handling order of key event 
-# https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3162
-# Patch5:        3162.patch
+Patch10:       autorotate.patch
 
 BuildRequires: pkgconfig(gobject-introspection-1.0) >= 1.41.0
 BuildRequires: pkgconfig(sm)
