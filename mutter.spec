@@ -2,7 +2,7 @@
 ## (rpmautospec version 0.3.5)
 ## RPMAUTOSPEC: autorelease, autochangelog
 %define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
-    release_number = 1;
+    release_number = 4;
     base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
     print(release_number + base_release_number - 1);
 }%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
@@ -128,6 +128,10 @@ Provides: bundled(cogl) = 1.22.0
 Provides: bundled(clutter) = 1.26.0
 
 Conflicts: mutter < 45~beta.1-2
+
+# Make sure dnf updates gnome-shell together with this package; otherwise we
+# might end up with broken gnome-shell installations due to mutter ABI changes.
+Conflicts: gnome-shell < 45~rc
 
 %description
 Mutter is a window and compositing manager that displays and manages
