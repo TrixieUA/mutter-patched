@@ -2,7 +2,7 @@
 ## (rpmautospec version 0.3.5)
 ## RPMAUTOSPEC: autorelease, autochangelog
 %define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
-    release_number = 3;
+    release_number = 2;
     base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
     print(release_number + base_release_number - 1);
 }%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
@@ -39,8 +39,6 @@ Patch1:        mutter-42.alpha-disable-tegra.patch
 
 # https://pagure.io/fedora-workstation/issue/79
 Patch2:        0001-place-Always-center-initial-setup-fedora-welcome.patch
-
-Patch3:        0001-gschema-Enable-scale-monitor-framebuffer-experimenta.patch
 
 # The triple buffer himself
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/1441
