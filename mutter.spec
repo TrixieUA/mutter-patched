@@ -44,17 +44,17 @@ Patch3:        0001-gschema-Enable-scale-monitor-framebuffer-experimenta.patch
 
 # The triple buffer himself
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/1441
-Patch3:        1441.patch
+Patch4:        1441.patch
 
-Patch4:        autorotate.patch
+Patch5:        autorotate.patch
 
 # GPU optimizations for partial surface update 
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/2965
-Patch5:	       2965.patch
+Patch6:	       2965.patch
 
 # Backports for 44.5 
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3222
-Patch6:        3222.patch
+Patch7:        3222.patch
 
 
 BuildRequires: pkgconfig(gobject-introspection-1.0) >= 1.41.0
