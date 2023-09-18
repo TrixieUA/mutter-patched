@@ -2,7 +2,7 @@
 ## (rpmautospec version 0.3.5)
 ## RPMAUTOSPEC: autorelease, autochangelog
 %define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
-    release_number = 2;
+    release_number = 3;
     base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
     print(release_number + base_release_number - 1);
 }%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
@@ -46,6 +46,10 @@ Patch3:        0001-gschema-Enable-scale-monitor-framebuffer-experimenta.patch
 # Draft: Dynamic triple/double buffering (v4) 
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/1441
 Patch4:        1441.patch
+
+# Try unparenting client windows when fullscreen again 
+# https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/2941
+Patch5:        2941.patch
 
 Patch10:       autorotate.patch
 
