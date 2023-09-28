@@ -2,7 +2,7 @@
 ## (rpmautospec version 0.3.5)
 ## RPMAUTOSPEC: autorelease, autochangelog
 %define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
-    release_number = 7;
+    release_number = 8;
     base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
     print(release_number + base_release_number - 1);
 }%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
@@ -33,25 +33,29 @@ URL:           http://www.gnome.org
 Source0:       http://download.gnome.org/sources/%{name}/45/%{name}-%{tarball_version}.tar.xz
 
 # Work-around for OpenJDK's compliance test
-Patch0:        0001-window-actor-Special-case-shaped-Java-windows.patch
+Patch0: 0001-window-actor-Special-case-shaped-Java-windows.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1936991
-Patch1:        mutter-42.alpha-disable-tegra.patch
+Patch1: mutter-42.alpha-disable-tegra.patch
 
 # https://pagure.io/fedora-workstation/issue/79
-Patch2:        0001-place-Always-center-initial-setup-fedora-welcome.patch
+Patch2: 0001-place-Always-center-initial-setup-fedora-welcome.patch
 
-Patch3:        0001-gschema-Enable-scale-monitor-framebuffer-experimenta.patch
+Patch3: 0001-gschema-Enable-scale-monitor-framebuffer-experimenta.patch
 
 # Draft: Dynamic triple/double buffering (v4) 
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/1441
-Patch4:        1441.patch
+Patch4: 1441.patch
 
 # backends/native: Main thread rt-scheduler: experimental feature no more 
 # https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3296
-Patch5:        3296.patch
+Patch5: 3296.patch
 
-Patch10:       autorotate.patch
+# clutter/frame-clock: Start next update ASAP after idle period
+# https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3174
+Patch6: 3174.patch
+
+Patch10: autorotate.patch
 
 BuildRequires: pkgconfig(gobject-introspection-1.0) >= 1.41.0
 BuildRequires: pkgconfig(sm)
